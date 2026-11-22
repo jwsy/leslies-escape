@@ -1,3 +1,26 @@
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
-export default defineConfig({ base: process.env.GITHUB_ACTIONS === 'true' ? '/leslies-escape/' : '/', plugins: [VitePWA({ registerType: 'autoUpdate', includeAssets: ['icons/*.svg','icons/*.png','sprites/leslie.png'], manifest: { name: "Leslie's Escape", short_name: "Leslie's Escape", description: 'A gentle coastal rescue adventure', theme_color: '#F8C9B6', background_color: '#F8C9B6', display: 'standalone', orientation: 'landscape', start_url: './', scope: './', icons: [{src:'icons/bunny-192.png',sizes:'192x192',type:'image/png',purpose:'any maskable'},{src:'icons/bunny-512.png',sizes:'512x512',type:'image/png',purpose:'any maskable'},{src:'icons/bunny.svg',sizes:'any',type:'image/svg+xml',purpose:'any maskable'}] } })] });
+export default defineConfig({
+  base: process.env.GITHUB_ACTIONS === 'true' ? '/leslies-escape/' : '/',
+  define: { __APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? '1.0.1') },
+  plugins: [VitePWA({
+    registerType: 'autoUpdate',
+    includeAssets: ['icons/*.svg', 'icons/*.png', 'sprites/leslie.png'],
+    manifest: {
+      name: "Leslie's Escape",
+      short_name: "Leslie's Escape",
+      description: 'A gentle coastal rescue adventure',
+      theme_color: '#F8C9B6',
+      background_color: '#F8C9B6',
+      display: 'standalone',
+      orientation: 'landscape',
+      start_url: './',
+      scope: './',
+      icons: [
+        { src: 'icons/bunny-192.png', sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+        { src: 'icons/bunny-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
+        { src: 'icons/bunny.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any maskable' },
+      ],
+    },
+  })],
+});
