@@ -31,7 +31,7 @@ Tap/click in the play area, press Space, or press ↑ to jump. Leslie runs right
 - `src/game/systems`: local progress and synthesized sound effects.
 - `public/icons`: original SVG app icon.
 
-Level 1 is a longer diagonal climb across eleven wider-spaced ledges, with the spike hazards removed. Missing a jump starts a gentle swim back to the left edge of a dry ledge, followed by a climb-out and automatic run. Jumping adds a brief happy expression, ear bounce, and sparkle effect. Levels 2 and 3 currently provide data scaffolds. Artwork is drawn procedurally with Phaser shapes, and sound is synthesized locally; there are no runtime API calls or external assets required by the game.
+Level 1 is a longer diagonal climb across eleven varied-length ledges with balanced gaps, with the spike hazards removed. Missing a jump starts a gentle swim back to the left edge of a dry ledge, followed by a climb-out and automatic run. Jumping adds a brief happy expression, ear bounce, and sparkle effect. Levels 2 and 3 currently provide data scaffolds. Artwork is drawn procedurally with Phaser shapes, and sound is synthesized locally; there are no runtime API calls or external assets required by the game.
 
 ## Offline and save data
 
