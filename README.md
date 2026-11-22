@@ -29,9 +29,10 @@ Tap/click in the play area, press Space, or press ↑ to jump. Leslie runs right
 - `src/game/levels`: data-driven level definitions for The Shore, The Cliffs, and The Sanctuary.
 - `src/game/scenes`: Phaser gameplay, pause, and completion scenes.
 - `src/game/systems`: local progress and synthesized sound effects.
-- `public/icons`: original SVG app icon.
+- `src/game/characters/LeslieView.ts`: Leslie’s layered sprite poses and effects.
+- `public/icons`: Leslie’s original favicon and install icons.
 
-Level 1 is a longer diagonal climb across eleven varied-length ledges with balanced gaps, with the spike hazards removed. Missing a jump starts a gentle swim back to the left edge of a dry ledge, followed by a climb-out and automatic run. Jumping adds a brief happy expression, ear bounce, and sparkle effect. Levels 2 and 3 currently provide data scaffolds. Artwork is drawn procedurally with Phaser shapes, and sound is synthesized locally; there are no runtime API calls or external assets required by the game.
+Level 1 is a longer diagonal climb across eleven varied-length ledges with balanced gaps, with the spike hazards removed. Missing a jump starts a gentle swim back to the left edge of a dry ledge, followed by a climb-out and automatic run. Leslie’s original artwork is bundled in `public/sprites/leslie.png`. To regenerate the sheet and icons after editing the artwork, run `node scripts/draw-leslie.mjs` with librsvg’s `rsvg-convert` installed. Levels 2 and 3 currently provide data scaffolds. Scenery is drawn in Phaser and sound is synthesized locally.
 
 ## Offline and save data
 
