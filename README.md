@@ -29,10 +29,10 @@ Tap/click in the play area, press Space, or press ↑ to jump. After rescuing fi
 - `src/game/levels`: data-driven level definitions for The Shore, The Cliffs, and The Sanctuary.
 - `src/game/scenes`: Phaser gameplay, pause, and completion scenes.
 - `src/game/systems`: local progress and synthesized sound effects.
-- `src/game/characters/LeslieView.ts`: Leslie’s layered sprite poses and effects.
+- `src/game/characters/LeslieView.ts`: Phaser artwork and effects, driven by the pose timing in `LeslieAnimation.ts`.
 - `public/icons`: Leslie’s original favicon and install icons.
 
-Level 1 is a longer diagonal climb across eleven varied-length ledges with balanced gaps and no spikes. The Cliffs and The Sanctuary are fully playable follow-up chapters, with spikes, wide hazard platforms, crumbling ledges, checkpoints, and power-ups. Missing a jump starts a gentle swim back to a dry ledge behind Leslie; the tide stays visible at the bottom of the view while rising at its world-space pace. Rescued birds carry across chapters and saved games. Leslie’s original artwork is bundled in `public/sprites/leslie.png`. To regenerate the sheet and icons after editing the artwork, run `node scripts/draw-leslie.mjs` with librsvg’s `rsvg-convert` installed. Scenery is drawn in Phaser and sound is synthesized locally.
+Level 1 is a longer diagonal climb across eleven varied-length ledges with balanced gaps and no spikes. The Cliffs and The Sanctuary are fully playable follow-up chapters, with spikes, wide hazard platforms, crumbling ledges, checkpoints, and power-ups. Missing a jump starts a gentle swim back to a dry ledge behind Leslie; the tide stays visible at the bottom of the view while rising at its world-space pace. Rescued birds carry across chapters and saved games. Leslie’s original artwork is bundled in `public/sprites/leslie.png`. The sheet pairs hand-posed body drawings with swappable heads, so Leslie can react to a rescue through a jump or landing. To regenerate the indexed PNG, head attachment coordinates, and icons, run `node scripts/draw-leslie.mjs` with `rsvg-convert` and `vips` installed. Scenery is drawn in Phaser and sound is synthesized locally.
 
 Run `npm test` for route reachability, spike-clearance, recovery, tide visibility, charge-jump, and save migration checks.
 

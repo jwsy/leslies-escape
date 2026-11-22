@@ -1,125 +1,221 @@
-// Run with Node and librsvg's rsvg-convert to regenerate Leslie's sprite sheet and icons.
+// Original artwork, drawn in world pixels and rasterized at 2× for Retina displays.
+// Run with node scripts/draw-leslie.mjs (requires rsvg-convert and vips).
 import { spawnSync } from 'node:child_process';
-import { writeFileSync } from 'node:fs';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const fur = (id) => `url(#${id})`;
-const outline = '#ad93ab';
-const ink = '#944765';
-const stroke = (color = outline, width = 1.15) =>
-  `stroke="${color}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round"`;
-const path = (d, fill, line = '') => `<path d="${d}" fill="${fill}" ${line}/>`;
-const ellipse = (x, y, rx, ry, fill) =>
-  `<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="${fill}"/>`;
-const place = (art, x, y, angle = 0, scale = 1) =>
-  `<g transform="translate(${x} ${y}) rotate(${angle}) scale(${scale})">${art}</g>`;
-
-const glow = ellipse(0, 0, 34, 33, fur('glow'));
-const tail = path('M5 1C5 5 1 7-3 6C-8 5-9 1-7-2Q-6-5-3-5Q0-8 3-5Q6-4 5 1Z', fur('shade'), stroke())
-  + ellipse(-3, -3, 2.5, 1.3, '#fffdf9');
-
-const farEar = path('M-3 1C-6-7-7-16-5-23C-3-29 2-31 5-26C8-20 6-13 4-7L3 2Z', fur('shade'), stroke('#b09bb1'))
-  + path('M0-4C-3-13-4-22 0-25C4-27 5-18 2-9L1-4Z', fur('ear'));
-const nearEar = path('M-4 2C-5-7-7-15-9-20C-12-27-10-33-5-32C0-31 5-25 6-19C7-13 2-5 3 2Z', fur('white'), stroke())
-  + path('M-2-4C-4-12-6-18-7-23C-9-29-6-30-3-27C1-24 4-19 3-15C2-10 0-6 0-4Q-1-2-2-4Z', fur('ear'))
-  + path('M-3-26Q1-22 2-18', 'none', stroke('#ffd9df', 1));
-
-const torso = path('M-18 4C-18-5-11-12-1-12C8-12 16-8 16 1C17 11 9 13 0 13C-10 13-17 11-18 4Z', fur('white'), stroke())
-  + path('M-13 2Q-13-5-6-7', 'none', stroke('#ffffff', 1.8))
-  + path('M-14 7C-10 11 2 12 10 7Q7 12-2 12Q-11 12-14 7Z', '#eee1ed');
-
-const head = path('M-14 3C-17-6-10-16-1-16.5C8-17.5 14-12 14.5-5.4C18.5-4.5 19.6-1.3 17.8 2C20.1 8.3 13.8 13.5 5.1 13.5C-4.6 14.9-13 10.7-14 3Z', fur('white'), stroke())
-  + path('M-10-6Q-7-13 1-13.3', 'none', stroke('#ffffff', 2.05));
-
-const hindPaw = path('M-8 0C-8-3-6-6-2-6C1-6 2-3 5-3Q9-3 9 1C9 4 4 5-1 5C-5 5-9 4-8 0Z', fur('white'), stroke())
-  + path('M5-1Q6 0 6 1.5', 'none', stroke('#dac2d6', .85));
-const forePaw = path('M-4-5C-1-7 4-6 4-2L4 0Q9 0 9 3C9 6 3 7 0 6C-3 5-6-2-4-5Z', fur('white'), stroke())
-  + path('M5 2Q6 2.5 6 4', 'none', stroke('#dac2d6', .85));
-
-const nose = path('M14-2.7C15-3.7 17-3.2 17.2-2.1C17.4-.9 15.4.2 14.8-.2C14.2-.5 13.5-1.8 14-2.7Z', '#cf6c8a')
-  + ellipse(15.7, -2.55, .75, .4, '#ffe4eb');
-const eye = (x, y, rx, ry) => ellipse(x, y, rx, ry, fur('eye'))
-  + ellipse(x + .95, y - 1.55, 1.12, 1.3, '#fff9fc')
-  + ellipse(x - 1.05, y + 1.9, .66, .73, '#ffd3e1');
-const cheek = (opacity = 1) => `<g opacity="${opacity}">${ellipse(5.15, 5.1, 6.75, 4.35, fur('blush'))}${path('M3.3 5.5L4 4.4M5.1 5.7L5.8 4.6M6.9 5.5L7.6 4.4', 'none', stroke('#e58da9', .8))}</g>`;
-const smile = path('M15.2.2Q14.4 4.4 10.8 3.7', 'none', stroke(ink, 1.05));
-const openSmile = path('M15.1.4C14.5 2.2 12.1 3 9.1 2.7C9.8 8.7 16.9 7.4 15.1.4Z', '#a64e70', stroke(ink, .65))
-  + path('M10.4 5.8Q12.5 3.9 14.6 5.5Q12.8 7.5 10.4 5.8Z', '#f29db5');
-
-const neutral = eye(5.3, -3.4, 3.2, 4.2) + cheek(.76) + nose + smile;
-const happy = eye(5.6, -3.8, 3.15, 4) + cheek(.95) + nose
-  + path('M15.3.2Q14.1 5.4 10 3.1', 'none', stroke(ink, 1.2));
-const joyful = eye(5.55, -4, 3.35, 4.35) + cheek() + nose + openSmile;
-const surprised = eye(5.6, -3.8, 3.4, 4.55) + cheek(.84) + nose
-  + ellipse(12.7, 3.6, 1.65, 1.8, '#a65473') + ellipse(12.9, 4.15, .75, .6, '#e998b1');
-const calm = eye(5.6, -2.8, 2.85, 3.1) + cheek(.72) + nose + smile;
-const closedEye = path('M2.6-3.7Q5.4-.9 8.3-3.85', 'none', stroke(ink, 1.3));
-const blink = closedEye + cheek() + nose + smile;
-const delighted = path('M2.6-2.6Q5.3-8.1 8.5-2.8', 'none', stroke(ink, 1.5)) + cheek() + nose + openSmile;
-
-const ripple = path('M-33 0Q-23-3-13-1Q1 2 10 0Q22-3 32 0Q23 0 12 3Q-1 5-13 2Q-27 1-33 3Z', fur('ripple'))
-  + path('M-22 2Q-15 1-8 3M12 2Q18 1 23 1', 'none', stroke('#dcfaf4', 1.05));
-const sparkle = path('M0-5Q.8-.7 4 0Q.8.8 0 5Q-.8.8-4 0Q-.8-.7 0-5Z', '#fff2c3')
-  + ellipse(0, 0, .85, .85, '#fffdfa');
-const smallSparkle = ellipse(0, 0, 1.65, 1.65, '#fff3d7');
-
-function jumpingPoster(expression) {
-  const bunny = place(tail, -19, 5, -10)
-    + place(hindPaw, -9, 13, 29)
-    + place(forePaw, 10, 0, -38)
-    + place(farEar, 0, -19, -74)
-    + place(torso, -2, 2)
-    + place(hindPaw, -11, 12, 39)
-    + place(nearEar, 7, -20, -39)
-    + place(head + expression, 9, -9, -4)
-    + place(forePaw, 15, 5, -54);
-  const stars = path('M0-5Q.9-.8 4.1 0Q.9.9 0 5Q-.9.9-4.1 0Q-.9-.8 0-5Z', '#ffd580', stroke('#eab272', .48));
-  return glow + place(bunny, 0, 4, -13, .95)
-    + place(stars, 25, -16, 10) + place(stars, -23, 12, -12, .77)
-    + ellipse(-27, 5, 1.35, 1.35, '#efbb9d');
+const write = (name, data) => writeFileSync(new URL('../' + name, import.meta.url), data);
+function render(executable, args, input) {
+  const result = spawnSync(executable, args, {input});
+  if (result.error || result.status !== 0) throw result.error ?? Error(result.stderr.toString());
 }
 
-// Cells are 144×144 at 2×. Keep this order in sync with LeslieView.ts.
-const cells = [
-  glow, tail, farEar, nearEar, torso,
-  head, hindPaw, forePaw, neutral, happy,
-  joyful, surprised, calm, blink, delighted,
-  ripple, sparkle, smallSparkle, jumpingPoster(joyful), jumpingPoster(closedEye + cheek() + nose + openSmile),
-];
-const definitions = `
-  <radialGradient id="glow"><stop stop-color="#ffe8b2" stop-opacity=".68"/><stop offset=".58" stop-color="#ffebbb" stop-opacity=".41"/><stop offset="1" stop-color="#fff5db" stop-opacity="0"/></radialGradient>
-  <linearGradient id="white" x1=".25" y1="0" x2=".62" y2="1" gradientUnits="objectBoundingBox"><stop stop-color="#fffefa"/><stop offset=".58" stop-color="#fffcf7"/><stop offset="1" stop-color="#eaddf0"/></linearGradient>
-  <linearGradient id="shade" x1=".3" y1="0" x2=".65" y2="1"><stop stop-color="#f9ecf6"/><stop offset="1" stop-color="#d8c4dc"/></linearGradient>
-  <linearGradient id="ear" x1="0" y1="0" x2=".8" y2="1"><stop stop-color="#f8c3d0"/><stop offset="1" stop-color="#e691af"/></linearGradient>
-  <linearGradient id="eye" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#9e3d67"/><stop offset="1" stop-color="#e782aa"/></linearGradient>
-  <radialGradient id="blush"><stop stop-color="#f28faf" stop-opacity=".86"/><stop offset="1" stop-color="#f4a8bc" stop-opacity="0"/></radialGradient>
-  <linearGradient id="ripple"><stop stop-color="#a6e7e9" stop-opacity="0"/><stop offset=".2" stop-color="#9edce6" stop-opacity=".83"/><stop offset=".78" stop-color="#b9edf0" stop-opacity=".81"/><stop offset="1" stop-color="#b9edf0" stop-opacity="0"/></linearGradient>`;
-const sheet = `<svg xmlns="http://www.w3.org/2000/svg" width="720" height="576" viewBox="0 0 360 288">
-  <defs>${definitions}</defs>
-  ${cells.map((cell, i) => place(cell, (i % 5) * 72 + 36, Math.floor(i / 5) * 72 + 36)).join('\n')}
-</svg>`;
+function png(svg, file, size) {
+  const args = size ? ['-w', String(size), '-h', String(size)] : [];
+  const destination = fileURLToPath(new URL('../public/' + file, import.meta.url));
+  if (size) {
+    render('rsvg-convert', [...args, '-o', destination], svg);
+    return;
+  }
+  const temp = mkdtempSync(join(tmpdir(), 'leslie-art-'));
+  try {
+    const source = join(temp, 'source.png');
+    render('rsvg-convert', ['-o', source], svg);
+    render('vips', ['pngsave', source, destination, '--palette', '--Q', '95', '--dither', '0', '--effort', '7']);
+  } finally {
+    rmSync(temp, {recursive: true, force: true});
+  }
+}
+const ink = '#886778', fur = 'url(#fur)', shade = 'url(#far)';
+const line = (color = ink, w = 1.25) => `stroke="${color}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"`;
+const path = (d, fill, outline = '') => `<path d="${d}" fill="${fill}" ${outline}/>`;
+const mark = (d, color, w) => path(d, 'none', line(color,w));
+const oval = (x,y,rx,ry,fill) => `<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="${fill}"/>`;
+const group = (art, transform) => `<g transform="${transform}">${art}</g>`;
+const place = (art,x,y,angle=0,sx=1,sy=sx) => group(art,`translate(${x} ${y}) rotate(${angle}) scale(${sx} ${sy})`);
+const defs = `<defs>
+  <linearGradient id="fur" x2=".28" y2="1"><stop stop-color="#fffef9"/><stop offset=".55" stop-color="#fffaf3"/><stop offset=".88" stop-color="#f5e8eb"/><stop offset="1" stop-color="#e6d8e7"/></linearGradient>
+  <linearGradient id="far" x2=".4" y2="1"><stop stop-color="#f7e9ec"/><stop offset="1" stop-color="#ceb9d0"/></linearGradient>
+  <linearGradient id="lining" x2=".2" y2="1"><stop stop-color="#ffd7cc"/><stop offset=".6" stop-color="#f4a5b2"/><stop offset="1" stop-color="#dc88a6"/></linearGradient>
+  <linearGradient id="iris" x2="0" y2="1"><stop stop-color="#8b3c62"/><stop offset=".55" stop-color="#c95a85"/><stop offset="1" stop-color="#ffabc0"/></linearGradient>
+  <linearGradient id="silk" x2=".5" y2="1"><stop stop-color="#b8e2d7"/><stop offset="1" stop-color="#75b4aa"/></linearGradient>
+  <radialGradient id="cheek"><stop stop-color="#f5a5b2"/><stop offset=".59" stop-color="#f7b5bd"/><stop offset="1" stop-color="#f9c6cb" stop-opacity="0"/></radialGradient>
+  <radialGradient id="light"><stop stop-color="#ffe5a4" stop-opacity=".64"/><stop offset=".58" stop-color="#ffe7a7" stop-opacity=".39"/><stop offset="1" stop-color="#fff1bd" stop-opacity="0"/></radialGradient>
+</defs>`;
+const star = path('M0 -4.6 Q.6 -1 3.8 0 Q.8 .7 0 4.6 Q-.6 1 -3.8 0 Q-.7 -.7 0 -4.6Z','#fff0b5',line('#d99c70',.55));
+const tail = path('M6 1 C4 6 -1 7 -5 4 Q-9 4 -8 1 Q-12 -2 -8 -5 Q-9 -9 -4 -8 Q-2 -12 1 -9 C6 -10 9 -4 6 1Z',fur,line())
+  + mark('M-6 -4 Q-5 -7 -3 -6','#fff',1.6);
+const torso = path('M-20 4 C-22 -5 -15 -14 -6 -14 C0 -17 8 -13 12 -8 C17 -3 17 6 11 11 C6 16 -7 16 -15 12 Q-21 10 -20 4Z',fur,line())
+  + mark('M-15 -6 Q-13 -9 -11 -9','#fff',1.85)
+  + path('M-17 6 C-11 12 -1 13 8 8 Q3 16 -8 13 Q-15 12 -17 6Z','#efe2e9');
 
-const icon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-36 -36 72 72">
-  <defs>${definitions}
-    <linearGradient id="icon-bg" x1="0" y1="0" x2=".9" y2="1">
-      <stop stop-color="#f9cdbd"/><stop offset="1" stop-color="#e8b9d8"/>
-    </linearGradient>
-  </defs>
-  <rect x="-36" y="-36" width="72" height="72" fill="url(#icon-bg)"/>
-  ${place(jumpingPoster(joyful), 0, 0, 0, .93)}
-</svg>
-`;
-
-const publicFile = (file) => fileURLToPath(new URL(`../public/${file}`, import.meta.url));
-function renderPng(svg, file, dimensions = []) {
-  const args = [...dimensions, '--output', publicFile(file)];
-  const result = spawnSync('rsvg-convert', args, { input: svg, stdio: ['pipe', 'inherit', 'inherit'] });
-  if (result.error) throw result.error;
-  if (result.status !== 0) throw new Error(`rsvg-convert failed for ${file}`);
+const headShape = path('M-14 -6 Q-16 -10 -12 -12 Q-10 -16 -5 -16 Q-7 -19 -4 -18 Q0 -18 2 -16 Q3 -20 6 -17 Q7 -16 8 -15 C15 -14 17 -8 18 -4 Q24 -3 22 1 C23 5 20 8 17 9 Q11 15 3 13 Q-4 14 -9 10 Q-13 11 -12 8 Q-18 8 -15 4 C-19 2 -16 -3 -14 -6Z',fur,line())
+  + mark('M-10 -10 Q-8 -13 -5 -13','#fff',2);
+const openMouth = path('M11 2.7 Q15 4.4 19.2 .8 Q18.8 10.4 13.2 8 Q11.1 6.6 11 2.7Z','#a35670',line('#88475e',.85))
+  + path('M13 6.7 Q15.2 4.5 17.4 5.4 Q15.6 9 13 6.7Z','#ffa8b5');
+const smile = mark('M19.8 .5 Q19 4.6 16.3 4 Q14.6 5.7 12.8 4.1','#95566c',1.05);
+const nose = path('M18.1 -3 Q19.4 -4.5 21.6 -3.8 Q23.4 -4.2 23.1 -2.7 Q22.5 -.7 20.6 -.25 Q18.9 -.8 18.1 -3Z','#de7e93',line('#aa667c',.7))
+  + mark('M19.8 -3.2 L21 -3.2','#ffe1dc',.8);
+const cuppedPaw = path('M-2 5 Q-5 4 -4 0 Q-6 -4 -3 -5 Q-2 -7 0 -5 Q3 -6 4 -3 Q6 1 3 4 Q1 6 -2 5Z',fur,line())
+  + mark('M-1 -4 Q0 -4 0 -2 M1 -4 L2 -2','#d6b6c3',.75);
+function head(mood) {
+  const cheerful = ['joy','delight','cheer','joyBlink'].includes(mood);
+  let eye;
+  if (mood === 'joyBlink') {
+    eye = mark('M3 -4 Q7 -.8 11 -4','#89495f',1.6);
+  } else if (cheerful) {
+    // A single soft, peaked ^ in profile, as in the Korean happy-eye emoticon ^^.
+    eye = mood === 'delight' ? mark('M2.4 -3.3 L6.8 -7.5 Q7.3 -8 7.8 -7.4 L11.8 -3.8 M2 -4.9 L3.2 -4.6','#873e5b',2.1)
+      : mark('M3.3 -2.8 L7.2 -8.1 Q7.6 -8.6 8 -8 L11.5 -3.4','#803e5b',2.15);
+  } else if (mood === 'blink') {
+    eye = mark('M3.6 -4.1 Q7.2 -.9 10.9 -4.4','#89495f',1.6);
+  } else {
+    const calm = mood === 'calm', wide = mood === 'wonder';
+    eye = place(oval(0,0,4.35,5.25,'url(#iris)') + mark('M-4.1 -.7 Q-3.9 -5.7 .5 -5.1 Q2.7 -5 3.7 -3','#85435f',1.15)
+      + oval(-1.1,-2.2,1.4,1.5,'#fffaf5') + oval(1.7,2.3,.8,.9,'#ffe2df'),7.6,-4.8,-5,1,calm?.72:wide?1.09:1);
+    if (wide || mood === 'curious') eye += mark('M3 -12 Q5 -13.6 7.5 -13','#b293a0',1);
+  }
+  const mouth = cheerful ? openMouth : mood === 'wonder' ? oval(16.4,4.9,1.8,2.05,'#aa607a') : smile;
+  const paws = mood === 'cheer' ? place(cuppedPaw,16,11,22,.82) + place(cuppedPaw,-3,11,-25) : '';
+  return headShape + oval(1.2,3.9,cheerful?7.8:6.6,cheerful?4.9:4.2,'url(#cheek)')
+    + mark('M-1.6 4.4 l.65 -1.1 M.8 4.8 l.7 -1.2','#dd859e',.85)
+    + eye + mouth + nose + mark('M13 1 l.1 0 M15 .5 l.1 0','#c19aa3',1) + paws;
 }
 
-renderPng(sheet, 'sprites/leslie.png');
-writeFileSync(publicFile('icons/bunny.svg'), icon);
-for (const size of ['192', '512']) {
-  renderPng(icon, `icons/bunny-${size}.png`, ['--width', size, '--height', size]);
+// A tapered ribbon along a cubic spine. Each key drawing places the ear bend and
+// the tip independently. The second ribbon is inset to form the pink lining.
+function ear(bendX,bendY,tipX,tipY,far) {
+  const cx = bendX*.42+3, cy = bendY*.88;
+  function ribbon(from,to,width) {
+    const left=[], right=[];
+    for(let i=0;i<=32;i++){
+      const u=i/32, t=from+(to-from)*u, s=1-t;
+      const x=3*s*s*t*cx + 3*s*t*t*bendX + t*t*t*tipX;
+      const y=3*s*s*t*cy + 3*s*t*t*bendY + t*t*t*tipY;
+      const dx=3*(s*s*cx+2*s*t*(bendX-cx)+t*t*(tipX-bendX));
+      const dy=3*(s*s*cy+2*s*t*(bendY-cy)+t*t*(tipY-bendY));
+      const radius=width*Math.pow(Math.sin(Math.PI*u),.48)*(.75+.46*u)/Math.hypot(dx,dy);
+      left.push(`${(x-dy*radius).toFixed(2)} ${(y+dx*radius).toFixed(2)}`);
+      right.push(`${(x+dy*radius).toFixed(2)} ${(y-dx*radius).toFixed(2)}`);
+    }
+    return 'M'+left.concat(right.reverse()).join(' L')+'Z';
+  }
+  return path(ribbon(0,1,far?4.45:5.55),far?shade:fur,line(far?'#a38899':ink,1.2))
+    + path(ribbon(.14,.89,far?2.2:3),'url(#lining)');
 }
+
+// Side-view leg silhouettes. The haunch flows directly into the long back foot.
+const hind = {
+  fold:'M-7 -4 C-1 -10 7 -5 6 1 Q5 4 2 5 Q8 3 10 6 Q11 9 7 10 L-3 10 C-11 10 -13 1 -7 -4Z',
+  drive:'M-6 -5 Q2 -8 5 -2 Q8 4 1 7 L-13 12 Q-18 13 -18 10 Q-18 8 -15 7 L-7 2 Q-10 -1 -6 -5Z',
+  trail:'M-7 -5 Q2 -9 6 -3 Q8 2 2 6 Q-6 11 -16 8 L-20 6 Q-22 3 -18 3 L-8 4 Q-11 0 -7 -5Z',
+  gather:'M-7 -5 Q0 -9 5 -4 Q7 0 4 4 L11 1 Q16 0 15 4 Q13 8 4 10 C-4 13 -13 6 -7 -5Z',
+};
+const fore = {
+  stand:'M-3 -4 Q0 -7 3 -3 L5 4 Q10 4 10 7 Q10 9 6 9 L2 9 Q-1 8 -2 4Z',
+  tuck:'M-4 -3 Q-1 -6 2 -3 L4 0 Q8 -4 10 -1 Q11 2 7 5 Q3 8 0 5Z',
+  reach:'M-4 -3 Q-1 -6 3 -2 L9 2 Q14 1 15 4 Q16 7 11 7 Q4 8 -1 4Z',
+  raise:'M-3 3 Q-6 0 -3 -3 Q0 -5 4 -6 Q5 -13 8 -12 Q12 -11 11 -6 Q11 0 6 2 Q1 6 -3 3Z',
+};
+const toeMarks = {
+  fold: mark('M6.1 6.8 q1 .7 1 1.7 M3.8 7.6 l.5 1.4','#cbb2be',.7),
+  gather: mark('M11.8 2.8 q1 .4 1 1.4','#cbb2be',.8),
+  drive: place(oval(0,0,3,1.15,'#edb5c2'),-13.3,9.1,-19),
+  trail: place(oval(0,0,3.2,1.2,'#edb5c2'),-15.1,5.7,9),
+  stand: mark('M6 5.9 q1 .7 1 1.7','#cfb3c2',.75),
+  tuck: mark('M6.7 -.3 l1.2 1.5','#cfb3c2',.75),
+  reach: mark('M12.2 3.5 q1 .5 1.1 1.5','#cfb3c2',.75),
+  raise: oval(8,-7,1.7,2.2,'#efbac6'),
+};
+function leg(shapes,key,x,y,angle,far=false) {
+  const silhouette = path(shapes[key],far?shade:fur,line(far?'#a28798':ink,1.1));
+  return place(silhouette + (far ? '' : toeMarks[key]),x,y,angle);
+}
+const scarf = path('M0 -5 Q-5 -8 -12 -7 L-16 -8 Q-14 -4 -10 -2 L-14 1 Q-7 2 -2 -1Z','#83c5b9',line('#698f91',.9))
+  + path('M-4 -9 Q4 -2 13 -8 L12 -3 Q4 1 -4 -3Z','url(#silk)',line('#709b98',.95))
+  + place(star,-3,-4,8,.74);
+
+// Root of the shot is the Arcade sprite's centre. The standing sole is at y=17.
+// Each drawing specifies a head socket, the spine of each ear, and a pair of leg silhouettes.
+const ears = {
+  perk:[[-13,-31,-25,-22],[-1,-32,-10,-27]],
+  listen:[[-12,-32,-22,-21],[3,-34,-5,-31]],
+  folded:[[-16,-20,-28,-10],[-9,-22,-22,-9]],
+  stream:[[-18,-22,-27,-16],[-20,-12,-33,1]],
+  loose:[[-15,-24,-26,-19],[-12,-20,-26,-10]],
+  lift:[[-8,-32,-18,-32],[4,-36,-5,-38]],
+  float:[[-21,-4,-39,6],[-21,13,-44,20]],
+};
+function drawing(headX,headY,tilt,earStyle,hindKey,foreKey, opts={}) {
+  const {bodyY=2,bodyX=-2,sx=1,sy=1,tailAngle=0,hindAngle=0,foreAngle=0,farForeAngle=foreAngle-18,
+    farHindAngle=hindAngle+13, nearTip=0,farTip=0,earTilt=0,nearForeY=5, hindY=5} = opts;
+  const [far,near]=ears[earStyle];
+  const earPair=place(ear(far[0],far[1],far[2],far[3]+farTip,true),-6,-10,earTilt+(['perk','listen','lift'].includes(earStyle)?-7:17))
+    +place(ear(near[0],near[1],near[2],near[3]+nearTip,false),-2,-10,earTilt);
+  const body=place(tail,-21,0,tailAngle)
+    +leg(hind,hindKey,-6,hindY-1,farHindAngle,true)+leg(fore,foreKey,9,nearForeY-2,farForeAngle,true)
+    +torso+leg(hind,hindKey,-10,hindY,hindAngle)+leg(fore,foreKey,7,nearForeY,foreAngle);
+  return {art:place(body,bodyX,bodyY,0,sx,sy)+place(earPair,headX,headY,tilt)
+    +place(scarf,headX-8,headY+18,tilt*.35), socket:[headX,headY,tilt]};
+}
+const d=drawing;
+const sitting=d(7,-8,-5,'perk','fold','stand');
+const squash=d(11,-4,6,'folded','fold','stand',{sx:1.09,sy:.77,bodyY:5});
+const longLeap=d(10,-12,-12,'stream','drive','reach',{bodyX:-3,sy:.88,hindAngle:-11,foreAngle:-34,tailAngle:-17});
+const hover=d(9,-11,-9,'loose','gather','tuck',{bodyY:0,foreAngle:-25,hindAngle:-8,nearTip:-4});
+const falling=d(10,-7,6,'lift','fold','reach',{foreAngle:35,nearForeY:6,hindAngle:13,tailAngle:-20});
+const cheer=d(5,-15,-14,'listen','fold','raise',{bodyX:-3,sx:.83,sy:1.14,foreAngle:-15,nearForeY:2});
+const clips = {
+  idle:[sitting,d(7,-8.7,-7,'listen','fold','stand',{sy:1.025,nearTip:2}),d(7,-9.2,-8,'listen','fold','stand',{sy:1.045,farTip:2}),d(7,-8.6,-6,'perk','fold','stand',{sy:1.02,nearTip:2})],
+  // Forefoot contact, weight catch, hind feet pass, compression, drive, flight, reach.
+  run:[
+    d(11,-7,4,'loose','trail','reach',{foreAngle:33,hindAngle:14,bodyY:0,nearForeY:5}),
+    d(10,-5,7,'folded','gather','stand',{sy:.87,bodyY:4,foreAngle:12,farTip:-4}),
+    d(8,-6,2,'folded','gather','tuck',{sx:.94,bodyY:2,hindAngle:6,nearTip:5}),
+    d(9,-8,-5,'loose','fold','tuck',{bodyY:1,nearTip:6,farTip:4}),
+    d(11,-11,-8,'loose','drive','tuck',{sx:1.04,bodyY:0,hindAngle:-14,nearTip:4}),
+    d(12,-13,-7,'stream','trail','reach',{bodyY:-2,sy:.88,foreAngle:-20,hindAngle:12}),
+    d(12,-12,-2,'stream','trail','reach',{bodyY:-2,sy:.9,nearTip:-4,hindAngle:15}),
+    d(12,-9,2,'loose','drive','reach',{bodyY:-1,foreAngle:16,farTip:-6})
+  ],
+  takeoff:[squash,d(10,-9,-8,'folded','drive','tuck',{bodyY:0,sy:.94}),longLeap],
+  ascent:[longLeap,d(10,-12,-13,'stream','drive','tuck',{hindAngle:4,foreAngle:-28,nearTip:-5,bodyY:-1})],
+  apex:[hover,d(9,-11,-6,'loose','gather','tuck',{bodyY:-1,nearTip:-6,farTip:-3})],
+  fall:[falling,d(10,-6,8,'lift','fold','reach',{nearTip:3,earTilt:7,foreAngle:34,hindAngle:17})],
+  land:[squash,d(10,-3,7,'folded','gather','stand',{sx:1.12,sy:.73,bodyY:5,nearTip:5}),d(8,-8,-3,'loose','fold','stand',{nearTip:7}),sitting],
+  swim:Array.from({length:8},(_,i)=>{
+    const beat=i*Math.PI/4,stroke=Math.sin(beat);
+    return d(11,2+Math.cos(beat)*.6,-5,'float','drive','reach',{bodyX:-4,bodyY:9,sx:1.01,sy:.69,
+      foreAngle:27+48*stroke,farForeAngle:27-48*stroke,hindAngle:-6-16*stroke,farHindAngle:-6+16*stroke,
+      nearTip:4+2*Math.sin(beat-.7),farTip:3+2*Math.sin(beat+.5),earTilt:-8});
+  }),
+  celebrate:[squash,d(6,-12,-10,'loose','gather','raise',{bodyY:-1,sy:1.04,nearForeY:1}),d(5,-18,-17,'listen','gather','raise',{bodyY:-6,sy:1.03,nearForeY:2,nearTip:4}),d(6,-17,-13,'perk','fold','raise',{bodyY:-3,nearForeY:1}),cheer],
+};
+const glow=oval(0,0,38,35,'url(#light)');
+const wake=mark('M-30 1 Q-22 -2 -14 0 M-17 2 Q-6 5 6 3 M12 1 Q18 -1 26 0','#d9faf2',1.8)
+  +mark('M-26 3 Q-19 5 -12 4 M16 3 Q20 2 24 2','#84cbcd',1.2);
+function portrait(mood) {
+  return group(place(glow,0,-5) + longLeap.art + place(head(mood),...longLeap.socket) + place(star,36,-25) + place(star,-30,9,5,.68),'translate(0 0)');
+}
+
+const cells=[];
+const add=art=>{cells.push(art);return cells.length-1;};
+const poses={};
+for(const [state,drawings] of Object.entries(clips)){
+  poses[state]=drawings.map(({art,socket})=>({frame:add(art),x:socket[0],y:socket[1],angle:socket[2]}));
+}
+const heads=Object.fromEntries(['curious','happy','joy','wonder','calm','blink','delight','cheer'].map(mood=>[mood,add(head(mood))]));
+const effects={glow:add(glow),wake:add(wake),star:add(star),speck:add(oval(0,0,1.55,1.55,'#ffedc2'))};
+const cell=104, pivotY=65, columns=8;
+// Portraits occupy the last two cells for the title and completion screens.
+while(cells.length%columns!==columns-2) add('');
+add(portrait('joy'));add(portrait('joyBlink'));
+const rows=cells.length/columns, width=columns*cell, height=rows*cell;
+const sheet=`<svg xmlns="http://www.w3.org/2000/svg" width="${width*2}" height="${height*2}" viewBox="0 0 ${width} ${height}">${defs}${cells.map((art,i)=>place(art,(i%columns+.5)*cell,Math.floor(i/columns)*cell+pivotY)).join('')}</svg>`;
+png(sheet,'sprites/leslie.png');
+write('src/game/characters/leslieFrames.json', JSON.stringify({cell:cell*2,pivotY:pivotY/cell,poses,heads,effects},null,2)+'\n');
+const icon=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="-42 -42 84 84">${defs}<rect x="-42" y="-42" width="84" height="84" fill="#f2ccca"/>${place(portrait('joy'),0,4,0,.96)}</svg>\n`;
+write('public/icons/bunny.svg',icon);
+for(const size of [192,512]) png(icon,`icons/bunny-${size}.png`,size);
