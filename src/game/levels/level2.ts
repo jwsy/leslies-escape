@@ -1,7 +1,7 @@
 import type { LevelDef } from './types';
 // A windy, branching-feeling ascent. Every jump remains within the same
 // forgiving auto-run arc as The Shore; long ledges offer room to time jumps.
-export const level2:LevelDef={id:2,title:'The Cliffs',width:3800,height:1200,start:{x:92,y:888},tideStart:1110,tideSpeed:6,platforms:[
+export const level2:LevelDef={id:2,title:'The Cliffs',width:3800,height:1200,start:{x:92,y:888},tideStart:1110,tideSpeed:4,platforms:[
  {id:'p0',x:40,y:930,width:175}, {id:'p1',x:270,y:855,width:110},
  {id:'p2',x:435,y:780,width:440}, {id:'p3',x:930,y:705,width:105,kind:'checkpoint'},
  {id:'p4',x:1105,y:630,width:170,kind:'crumble'}, {id:'p5',x:1345,y:555,width:440},

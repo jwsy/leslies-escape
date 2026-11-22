@@ -1,6 +1,6 @@
 # Leslie’s Escape
 
-A peaceful, one-touch platform adventure built with Phaser 3, TypeScript, and Vite. Leslie auto-runs across the Shore, wakes sleeping birds, and stays ahead of a gently rising sea. Progress is stored locally; after the first successful load, the PWA caches the app shell for offline play.
+A peaceful, one-touch platform adventure built with Phaser 3, TypeScript, and Vite. Leslie auto-runs across the Shore, wakes sleeping birds, and stays above a gently rising sea. The tide advances at a slower pace and pauses below Leslie's current ledge while she is running, leaving a clear strip of air under her feet. Progress is stored locally; after the first successful load, the PWA caches the app shell for offline play.
 
 ## Run locally
 
@@ -34,7 +34,7 @@ Tap/click in the play area, press Space, or press ↑ to jump. After rescuing fi
 
 Level 1 is a longer diagonal climb across eleven varied-length ledges with balanced gaps and no spikes. The Cliffs and The Sanctuary are fully playable follow-up chapters, with spikes, solid spike-bearing ledges at least 440 px long and 96 px clear on both sides, separate crumbling ledges, checkpoints, and power-ups. Swim recovery only chooses dry stable platforms and places Leslie’s feet at the platform surface. Rescued birds carry across chapters and saved games. Leslie’s original artwork is bundled in `public/sprites/leslie.png`. The sheet pairs hand-posed body drawings with swappable heads, so Leslie can react to a rescue through a jump or landing. To regenerate the indexed PNG, head attachment coordinates, and icons, run `node scripts/draw-leslie.mjs` with `rsvg-convert` and `vips` installed. Scenery is drawn in Phaser and sound is synthesized locally.
 
-Run `npm test` for 120 Hz, circle-body jump and hazard simulations, spike-clearance, stable-platform recovery, tide visibility, charge timing, animation, and save migration checks.
+Run `npm test` for 120 Hz, circle-body jump and hazard simulations, spike-clearance, stable-platform recovery, tide visibility and safe ledge clearance, charge timing, animation, and save migration checks.
 
 ## Offline and save data
 

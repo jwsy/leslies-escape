@@ -1,7 +1,7 @@
 import type { LevelDef } from './types';
 // Final climb above the clouds: the ledges narrow and crumbles return, while
 // checkpoint nests keep the finale gentle and recoverable.
-export const level3:LevelDef={id:3,title:'The Sanctuary',width:4200,height:1200,start:{x:92,y:888},tideStart:1110,tideSpeed:6,platforms:[
+export const level3:LevelDef={id:3,title:'The Sanctuary',width:4200,height:1200,start:{x:92,y:888},tideStart:1110,tideSpeed:4.5,platforms:[
  {id:'p0',x:40,y:930,width:190}, {id:'p1',x:285,y:855,width:115,kind:'checkpoint'},
  {id:'p2',x:455,y:780,width:440}, {id:'p3',x:950,y:705,width:115,kind:'crumble'},
  {id:'p4',x:1135,y:630,width:190,kind:'checkpoint'}, {id:'p5',x:1395,y:555,width:440},

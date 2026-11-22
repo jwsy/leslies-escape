@@ -4,7 +4,7 @@ import { level2 } from '../levels/level2';
 import { level3 } from '../levels/level3';
 import type { LevelDef, PowerKind } from '../levels/types';
 import { SaveSystem } from '../systems/SaveSystem';
-import { cameraFollowOffset, chargedJumpMultiplier, chooseSwimTarget, CRUMBLE_DELAY_MS, PLAYER_BODY_OFFSET_Y, PLAYER_BODY_RADIUS, POWER_JUMP_CHARGE_MS, POWER_JUMP_HOLD_DELAY_MS, powerJumpUnlocked, recoveryLandingX, recoveryPlayerY, riseTide, swimStep, visibleWaterY } from '../systems/GameplayRules';
+import { cameraFollowOffset, chargedJumpMultiplier, chooseSwimTarget, CRUMBLE_DELAY_MS, keepTideBelowPlatform, PLAYER_BODY_OFFSET_Y, PLAYER_BODY_RADIUS, POWER_JUMP_CHARGE_MS, POWER_JUMP_HOLD_DELAY_MS, powerJumpUnlocked, recoveryLandingX, recoveryPlayerY, riseTide, swimStep, visibleWaterY } from '../systems/GameplayRules';
 import { audio } from '../../main';
 import { LeslieView } from '../characters/LeslieView';
 
@@ -39,7 +39,7 @@ export class LevelScene extends Phaser.Scene{
  }
  private drawScenery(){const g=this.scenery;const final=this.level.id===3,cliffs=this.level.id===2;const top=final?0xd8d8f0:cliffs?0xf4c5bd:0xf8c9b6;const bottom=final?0xb8cae1:cliffs?0xb4b8d0:0xc5b8e8;g.fillGradientStyle(top,top,bottom,bottom,1);g.fillRect(0,-160,this.level.width,this.level.height+160);g.fillStyle(final?0xfff4d7:0xffe3a7,.8);g.fillCircle(final?2500:780,final?120:110,49);g.fillStyle(0xffffff,.34);g.fillCircle(final?2500:780,final?120:110,65);const colors=final?[0xc7d6e5,0xb4cbd7,0xa5c1c2,0x9dafac]:cliffs?[0xd4b7c9,0xb5aacb,0xa5b4c0,0x98aa9f]:[0xc8b9dc,0xb4b0d0,0xa7b6bd,0x9eac9f];for(let layer=0;layer<4;layer++){g.fillStyle(colors[layer]!,.48+layer*.11);g.beginPath();g.moveTo(0,340+layer*75);for(let x=0;x<=this.level.width;x+=90)g.lineTo(x,Math.sin(x*.009+layer*2)*50+380+layer*70);g.lineTo(this.level.width,this.level.height);g.lineTo(0,this.level.height);g.closePath();g.fillPath();}if(cliffs||final){for(let i=0;i<28;i++){const x=(i*197+70)%this.level.width,y=180+(i*131)%(this.level.height-280);g.fillStyle(final?0xffffff:0xf7e9db,.14);g.fillEllipse(x,y,110,34);}}for(let i=0;i<90;i++){const x=(i*137)%this.level.width,y=85+(i*73)%(this.level.height-160);g.fillStyle(i%2?0xfff5dc:0xffd8cb,.45);g.fillCircle(x,y,1.3);}}
  private drawWater(){const g=this.water;g.clear();const y=this.waterSurfaceY;g.fillStyle(0x75c9db,.96);g.fillRect(0,y,this.level.width,this.level.height-y);g.fillStyle(0x4e9fbf,.36);g.fillRect(0,y+32,this.level.width,this.level.height-y-32);g.lineStyle(3,0xb7edf0,.7);g.beginPath();for(let x=0;x<=this.level.width;x+=12){const yy=y+Math.sin(x*.025+this.gameTime*.002)*4; x===0?g.moveTo(x,yy):g.lineTo(x,yy);}g.strokePath();for(let i=0;i<22;i++){const x=(i*79+this.gameTime*.012)%this.level.width, yy=y+22+(i*37)%85;g.fillStyle(0xd7f7ed,.34);g.fillEllipse(x,yy,13,2);}}
- private get waterSurfaceY(){return visibleWaterY(this.waterY,this.cameras.main.scrollY,this.cameras.main.height,96,this.level.tideStart-this.waterY);}
+ private get waterSurfaceY(){const visible=visibleWaterY(this.waterY,this.cameras.main.scrollY,this.cameras.main.height,96);if(this.recovering)return visible;const body=this.player?.body;const grounded=!!body&&(body.blocked.down||body.touching.down);const platform=this.level.platforms.find(p=>p.id===this.lastPlatform);return grounded&&platform?Math.max(visible,platform.y+48):visible;}
  private updateLeslie(_time:number,dt:number){
   const {x,y,body}=this.player;
   const {x:vx,y:vy}=body!.velocity;
@@ -82,7 +82,7 @@ export class LevelScene extends Phaser.Scene{
   const grounded=this.player.body!.blocked.down||this.player.body!.touching.down;const chargeActive=this.jumpChargingAt!==null&&this.time.now-this.jumpChargingAt>=POWER_JUMP_HOLD_DELAY_MS;if(chargeActive&&grounded)this.player.setVelocityX(0);else if(this.powers.rush>0)this.player.setVelocityX(PHYSICS.runSpeed*1.25);else this.player.setVelocityX(PHYSICS.runSpeed);if(grounded&&this.time.now-this.footstepAt>420){this.footstepAt=this.time.now;audio.tone(92,.035,'sine',68);}
   if(this.powers.glide>0&&this.player.body!.velocity.y>100)this.player.setVelocityY(Math.min(this.player.body!.velocity.y,190));
   for(const k of Object.keys(this.powers) as PowerKind[]){if(this.powers[k]>1)this.powers[k]=Math.max(0,this.powers[k]-dt);}
-  this.waterY=riseTide(this.waterY,dt,this.level.tideSpeed,this.powers.calm>0);if(this.player.y>this.waterY-8)this.beginRecovery(true);
+  const risenTide=riseTide(this.waterY,dt,this.level.tideSpeed,this.powers.calm>0);const currentPlatform=this.level.platforms.find(p=>p.id===this.lastPlatform);this.waterY=grounded&&currentPlatform?keepTideBelowPlatform(risenTide,currentPlatform.y):risenTide;if(this.player.y>this.waterY-8)this.beginRecovery(true);
   this.updateBirds(true);
   this.powerObjects.forEach(p=>{if(!p.active)return;p.g.clear();p.g.fillStyle(p.kind==='glide'?0xffedb7:0x9ce7ec,1);p.g.fillCircle(p.x,p.y+Math.sin(this.gameTime*.004)*4,12);p.g.fillStyle(0xffffff,.85);p.g.fillCircle(p.x-4,p.y-5,4);p.g.lineStyle(2,0xffffff,.85);p.g.strokeCircle(p.x,p.y,17);if(Phaser.Math.Distance.Between(this.player.x,this.player.y,p.x,p.y)<28)this.activate(p.kind,p.id);});
   this.drawWater();this.updateHud();if(this.player.x>this.level.width-50)this.finish();if(this.player.y>this.level.height+50)this.beginRecovery(true);

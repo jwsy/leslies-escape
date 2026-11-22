@@ -2,7 +2,7 @@ import type { LevelDef } from './types';
 
 // Eleven broad ledges form a long, rising diagonal. The gaps are deliberate:
 // each asks for a well-timed jump from near an edge, while remaining reachable.
-export const level1:LevelDef={id:1,title:'The Shore',width:2700,height:1200,start:{x:92,y:888},tideStart:1120,tideSpeed:5,platforms:[
+export const level1:LevelDef={id:1,title:'The Shore',width:2700,height:1200,start:{x:92,y:888},tideStart:1120,tideSpeed:3.5,platforms:[
  {id:'p0',x:40,y:930,width:175},
  {id:'p1',x:270,y:855,width:130},
  {id:'p2',x:455,y:780,width:180},
