@@ -1,9 +1,11 @@
 import {describe,it,expect} from 'vitest';
 import {level1} from '../src/game/levels/level1';
-import {chooseSafeRecovery,jumpCanReach,riseTide} from '../src/game/systems/GameplayRules';
+import {chooseSwimTarget,jumpCanReach,riseTide,swimStep} from '../src/game/systems/GameplayRules';
 const tuning={runSpeed:175,jumpVelocity:-455,gravity:950};
 describe('Level 1 gameplay rules',()=>{
- it('keeps each major Shore jump within one automatic run arc',()=>{const route=level1.platforms.filter(p=>/^p\d$/.test(p.id)).sort((a,b)=>a.x-b.x);for(let i=0;i<route.length-1;i++)expect(jumpCanReach(route[i]!,route[i+1]!,tuning),`${route[i]!.id} → ${route[i+1]!.id}`).toBe(true)});
+ it('has a longer, steadily rising route with wider reachable jumps',()=>{const route=level1.platforms.filter(p=>/^p\d+$/.test(p.id)).sort((a,b)=>a.x-b.x);expect(route.length).toBeGreaterThanOrEqual(10);for(let i=0;i<route.length-1;i++){expect(route[i]!.y).toBeGreaterThan(route[i+1]!.y);expect(route[i+1]!.x-(route[i]!.x+route[i]!.width)).toBeGreaterThanOrEqual(80);expect(jumpCanReach(route[i]!,route[i+1]!,tuning),`${route[i]!.id} → ${route[i+1]!.id}`).toBe(true)}});
+ it('keeps spikes out of the first round',()=>expect(level1.hazards).toHaveLength(0));
  it('rises steadily and slows while Tide Calm is active',()=>{expect(riseTide(700,1000,5)).toBe(695);expect(riseTide(700,1000,5,true)).toBe(697.75)});
- it('chooses a dry recovery ledge and falls back from a submerged checkpoint',()=>{const preferred=level1.platforms.find(p=>p.id==='p0')!;const result=chooseSafeRecovery(level1.platforms,'p0','p3',600);expect(result?.id).not.toBe(preferred.id);expect(result!.y).toBeLessThan(576);});
+ it('swims back to the previous dry platform and finds another dry ledge when both the prior ledge and checkpoint are submerged',()=>{expect(chooseSwimTarget(level1.platforms,'p7','p4',1820,900)?.id).toBe('p7');expect(chooseSwimTarget(level1.platforms,'p8','p4',2000,340)?.id).toBe('p9');});
+ it('moves through the water toward a ledge without teleporting or overshooting',()=>{const halfway=swimStep(600,400,220,500);expect(halfway).toBe(490);expect(swimStep(halfway,400,220,600)).toBe(400);});
 });
