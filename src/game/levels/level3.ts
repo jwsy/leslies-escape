@@ -3,11 +3,11 @@ import type { LevelDef } from './types';
 // checkpoint nests keep the finale gentle and recoverable.
 export const level3:LevelDef={id:3,title:'The Sanctuary',width:4200,height:1200,start:{x:92,y:888},tideStart:1110,tideSpeed:6,platforms:[
  {id:'p0',x:40,y:930,width:190}, {id:'p1',x:285,y:855,width:115,kind:'checkpoint'},
- {id:'p2',x:455,y:780,width:440,kind:'crumble'}, {id:'p3',x:950,y:705,width:115},
- {id:'p4',x:1135,y:630,width:190,kind:'checkpoint'}, {id:'p5',x:1395,y:555,width:440,kind:'crumble'},
+ {id:'p2',x:455,y:780,width:440}, {id:'p3',x:950,y:705,width:115,kind:'crumble'},
+ {id:'p4',x:1135,y:630,width:190,kind:'checkpoint'}, {id:'p5',x:1395,y:555,width:440},
  {id:'p6',x:1905,y:480,width:165}, {id:'p7',x:2140,y:405,width:115,kind:'crumble'},
  {id:'p8',x:2325,y:330,width:440,kind:'checkpoint'}, {id:'p9',x:2835,y:255,width:110},
- {id:'p10',x:3015,y:180,width:440,kind:'crumble'}, {id:'p11',x:3525,y:105,width:130,kind:'checkpoint'},
+ {id:'p10',x:3015,y:180,width:440}, {id:'p11',x:3525,y:105,width:130,kind:'checkpoint'},
  {id:'p12',x:3725,y:35,width:280,kind:'sanctuary'}
 ],birds:[
  {id:'skybird-1',x:325,y:820,color:0xf2a7a0}, {id:'skybird-2',x:675,y:745,color:0x91c6dd},

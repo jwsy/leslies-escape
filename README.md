@@ -32,9 +32,9 @@ Tap/click in the play area, press Space, or press ↑ to jump. After rescuing fi
 - `src/game/characters/LeslieView.ts`: Phaser artwork and effects, driven by the pose timing in `LeslieAnimation.ts`.
 - `public/icons`: Leslie’s original favicon and install icons.
 
-Level 1 is a longer diagonal climb across eleven varied-length ledges with balanced gaps and no spikes. The Cliffs and The Sanctuary are fully playable follow-up chapters, with spikes, spike-bearing ledges at least 440 px long and 96 px clear on both sides, crumbling ledges, checkpoints, and power-ups. Missing a jump starts a gentle swim back to a dry ledge behind Leslie; the tide stays in view and rises visibly as the camera follows Leslie. Rescued birds carry across chapters and saved games. Leslie’s original artwork is bundled in `public/sprites/leslie.png`. The sheet pairs hand-posed body drawings with swappable heads, so Leslie can react to a rescue through a jump or landing. To regenerate the indexed PNG, head attachment coordinates, and icons, run `node scripts/draw-leslie.mjs` with `rsvg-convert` and `vips` installed. Scenery is drawn in Phaser and sound is synthesized locally.
+Level 1 is a longer diagonal climb across eleven varied-length ledges with balanced gaps and no spikes. The Cliffs and The Sanctuary are fully playable follow-up chapters, with spikes, solid spike-bearing ledges at least 440 px long and 96 px clear on both sides, separate crumbling ledges, checkpoints, and power-ups. Swim recovery only chooses dry stable platforms and places Leslie’s feet at the platform surface. Rescued birds carry across chapters and saved games. Leslie’s original artwork is bundled in `public/sprites/leslie.png`. The sheet pairs hand-posed body drawings with swappable heads, so Leslie can react to a rescue through a jump or landing. To regenerate the indexed PNG, head attachment coordinates, and icons, run `node scripts/draw-leslie.mjs` with `rsvg-convert` and `vips` installed. Scenery is drawn in Phaser and sound is synthesized locally.
 
-Run `npm test` for route reachability, spike-clearance, recovery, tide visibility, charge-jump, and save migration checks.
+Run `npm test` for 120 Hz, circle-body jump and hazard simulations, spike-clearance, stable-platform recovery, tide visibility, charge timing, animation, and save migration checks.
 
 ## Offline and save data
 

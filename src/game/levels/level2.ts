@@ -3,10 +3,10 @@ import type { LevelDef } from './types';
 // forgiving auto-run arc as The Shore; long ledges offer room to time jumps.
 export const level2:LevelDef={id:2,title:'The Cliffs',width:3800,height:1200,start:{x:92,y:888},tideStart:1110,tideSpeed:6,platforms:[
  {id:'p0',x:40,y:930,width:175}, {id:'p1',x:270,y:855,width:110},
- {id:'p2',x:435,y:780,width:440,kind:'crumble'}, {id:'p3',x:930,y:705,width:105,kind:'checkpoint'},
- {id:'p4',x:1105,y:630,width:170}, {id:'p5',x:1345,y:555,width:440,kind:'crumble'},
+ {id:'p2',x:435,y:780,width:440}, {id:'p3',x:930,y:705,width:105,kind:'checkpoint'},
+ {id:'p4',x:1105,y:630,width:170,kind:'crumble'}, {id:'p5',x:1345,y:555,width:440},
  {id:'p6',x:1855,y:480,width:160}, {id:'p7',x:2085,y:405,width:110,kind:'checkpoint'},
- {id:'p8',x:2265,y:330,width:180}, {id:'p9',x:2515,y:255,width:440,kind:'crumble'},
+ {id:'p8',x:2265,y:330,width:180,kind:'crumble'}, {id:'p9',x:2515,y:255,width:440},
  {id:'p10',x:3025,y:180,width:160}, {id:'p11',x:3255,y:105,width:120,kind:'checkpoint'},
  {id:'p12',x:3445,y:35,width:250,kind:'sanctuary'}
 ],birds:[
