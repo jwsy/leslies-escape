@@ -41,25 +41,23 @@ const defs = `<defs>
   <linearGradient id="lining" x2=".2" y2="1"><stop stop-color="#ffd7cc"/><stop offset=".6" stop-color="#f4a5b2"/><stop offset="1" stop-color="#dc88a6"/></linearGradient>
   <linearGradient id="iris" x2="0" y2="1"><stop stop-color="#8b3c62"/><stop offset=".55" stop-color="#c95a85"/><stop offset="1" stop-color="#ffabc0"/></linearGradient>
   <linearGradient id="silk" x2=".5" y2="1"><stop stop-color="#b8e2d7"/><stop offset="1" stop-color="#75b4aa"/></linearGradient>
+  <radialGradient id="coatHighlight"><stop stop-color="#fffef8"/><stop offset=".62" stop-color="#fffdf8" stop-opacity=".9"/><stop offset="1" stop-color="#fffcf6" stop-opacity="0"/></radialGradient>
   <radialGradient id="cheek"><stop stop-color="#f5a5b2"/><stop offset=".59" stop-color="#f7b5bd"/><stop offset="1" stop-color="#f9c6cb" stop-opacity="0"/></radialGradient>
   <radialGradient id="light"><stop stop-color="#ffe5a4" stop-opacity=".64"/><stop offset=".58" stop-color="#ffe7a7" stop-opacity=".39"/><stop offset="1" stop-color="#fff1bd" stop-opacity="0"/></radialGradient>
 </defs>`;
 const star = path('M0 -4.6 Q.6 -1 3.8 0 Q.8 .7 0 4.6 Q-.6 1 -3.8 0 Q-.7 -.7 0 -4.6Z','#fff0b5',line('#d99c70',.55));
-const tail = path('M6 1 C4 6 -1 7 -5 4 Q-9 4 -8 1 Q-12 -2 -8 -5 Q-9 -9 -4 -8 Q-2 -12 1 -9 C6 -10 9 -4 6 1Z',fur,line())
-  + mark('M-6 -4 Q-5 -7 -3 -6','#fff',1.6);
-const torso = path('M-20 4 C-22 -5 -15 -14 -6 -14 C0 -17 8 -13 12 -8 C17 -3 17 6 11 11 C6 16 -7 16 -15 12 Q-21 10 -20 4Z',fur,line())
-  + mark('M-15 -6 Q-13 -9 -11 -9','#fff',1.85)
-  + path('M-17 6 C-11 12 -1 13 8 8 Q3 16 -8 13 Q-15 12 -17 6Z','#efe2e9');
+const tail = 'M6 1 C5 6 0 8 -4 6 Q-10 7 -10 2 Q-14 -1 -10 -5 Q-11 -10 -5 -9 Q-1 -14 3 -10 C9 -11 10 -3 6 1Z';
+const torso = 'M-30 -2 C-31 -15 -23 -27 -11 -28 C1 -30 13 -22 16 -10 C20 1 16 9 7 11 C-1 14 -13 14 -20 10 Q-30 7 -30 -2Z';
 
-const headShape = path('M-14 -6 Q-16 -10 -12 -12 Q-10 -16 -5 -16 Q-7 -19 -4 -18 Q0 -18 2 -16 Q3 -20 6 -17 Q7 -16 8 -15 C15 -14 17 -8 18 -4 Q24 -3 22 1 C23 5 20 8 17 9 Q11 15 3 13 Q-4 14 -9 10 Q-13 11 -12 8 Q-18 8 -15 4 C-19 2 -16 -3 -14 -6Z',fur,line())
-  + mark('M-10 -10 Q-8 -13 -5 -13','#fff',2);
+const headShape = path('M-16 -6 Q-17 -11 -12 -13 Q-10 -17 -5 -17 Q-7 -20 -4 -19 Q0 -19 2 -17 Q3 -21 6 -18 Q7 -17 8 -16 C16 -15 18 -8 18 -4 Q24 -3 22 1 C24 7 18 13 12 14 Q4 18 -5 14 Q-14 13 -16 8 Q-20 8 -18 4 C-21 1 -19 -3 -16 -6Z',fur,line())
+  + mark('M-12 -9 Q-10 -13 -6 -14','#fff',2);
 const openMouth = path('M11 2.7 Q15 4.4 19.2 .8 Q18.8 10.4 13.2 8 Q11.1 6.6 11 2.7Z','#a35670',line('#88475e',.85))
   + path('M13 6.7 Q15.2 4.5 17.4 5.4 Q15.6 9 13 6.7Z','#ffa8b5');
 const smile = mark('M19.8 .5 Q19 4.6 16.3 4 Q14.6 5.7 12.8 4.1','#95566c',1.05);
 const nose = path('M18.1 -3 Q19.4 -4.5 21.6 -3.8 Q23.4 -4.2 23.1 -2.7 Q22.5 -.7 20.6 -.25 Q18.9 -.8 18.1 -3Z','#de7e93',line('#aa667c',.7))
   + mark('M19.8 -3.2 L21 -3.2','#ffe1dc',.8);
-const cuppedPaw = path('M-2 5 Q-5 4 -4 0 Q-6 -4 -3 -5 Q-2 -7 0 -5 Q3 -6 4 -3 Q6 1 3 4 Q1 6 -2 5Z',fur,line())
-  + mark('M-1 -4 Q0 -4 0 -2 M1 -4 L2 -2','#d6b6c3',.75);
+const cuppedPaw = path('M-2 5 Q-6 4 -5 0 Q-6 -5 -2 -5 Q1 -7 4 -4 Q7 -1 4 3 Q2 6 -2 5Z',fur)
+  + oval(.4,-.5,2.2,1.8,'#f1c4cc');
 function head(mood) {
   const cheerful = ['joy','delight','cheer','joyBlink'].includes(mood);
   let eye;
@@ -79,7 +77,7 @@ function head(mood) {
   }
   const mouth = cheerful ? openMouth : mood === 'wonder' ? oval(16.4,4.9,1.8,2.05,'#aa607a') : smile;
   const paws = mood === 'cheer' ? place(cuppedPaw,16,11,22,.82) + place(cuppedPaw,-3,11,-25) : '';
-  return headShape + oval(1.2,3.9,cheerful?7.8:6.6,cheerful?4.9:4.2,'url(#cheek)')
+  return headShape + oval(-.2,4.3,cheerful?9.6:8.1,cheerful?5.8:4.9,'url(#cheek)')
     + mark('M-1.6 4.4 l.65 -1.1 M.8 4.8 l.7 -1.2','#dd859e',.85)
     + eye + mouth + nose + mark('M13 1 l.1 0 M15 .5 l.1 0','#c19aa3',1) + paws;
 }
@@ -119,20 +117,17 @@ const fore = {
   reach:'M-4 -3 Q-1 -6 3 -2 L9 2 Q14 1 15 4 Q16 7 11 7 Q4 8 -1 4Z',
   raise:'M-3 3 Q-6 0 -3 -3 Q0 -5 4 -6 Q5 -13 8 -12 Q12 -11 11 -6 Q11 0 6 2 Q1 6 -3 3Z',
 };
-const toeMarks = {
-  fold: mark('M6.1 6.8 q1 .7 1 1.7 M3.8 7.6 l.5 1.4','#cbb2be',.7),
-  gather: mark('M11.8 2.8 q1 .4 1 1.4','#cbb2be',.8),
-  drive: place(oval(0,0,3,1.15,'#edb5c2'),-13.3,9.1,-19),
-  trail: place(oval(0,0,3.2,1.2,'#edb5c2'),-15.1,5.7,9),
-  stand: mark('M6 5.9 q1 .7 1 1.7','#cfb3c2',.75),
-  tuck: mark('M6.7 -.3 l1.2 1.5','#cfb3c2',.75),
-  reach: mark('M12.2 3.5 q1 .5 1.1 1.5','#cfb3c2',.75),
-  raise: oval(8,-7,1.7,2.2,'#efbac6'),
-};
-function leg(shapes,key,x,y,angle,far=false) {
-  const silhouette = path(shapes[key],far?shade:fur,line(far?'#a28798':ink,1.1));
-  return place(silhouette + (far ? '' : toeMarks[key]),x,y,angle);
+// Outline the combined silhouette first, then cover every internal overlap with
+// one coat colour. The soft highlight sits inside the rump across all limb poses.
+function coat(shapes) {
+  const silhouette = shapes.join('');
+  return `<g fill="${ink}" ${line(ink, 2.2)}>${silhouette}</g><g fill="#f7eff0">${silhouette}</g>`;
 }
+const shape = (d, x, y, angle = 0) => place(`<path d="${d}"/>`, x, y, angle);
+const pads = {
+  drive: place(oval(0,0,2.6,1.1,'#efc3cc'),-13.3,9.1,-19),
+  trail: place(oval(0,0,2.7,1.1,'#efc3cc'),-15.1,5.7,9),
+};
 const scarf = path('M0 -5 Q-5 -8 -12 -7 L-16 -8 Q-14 -4 -10 -2 L-14 1 Q-7 2 -2 -1Z','#83c5b9',line('#698f91',.9))
   + path('M-4 -9 Q4 -2 13 -8 L12 -3 Q4 1 -4 -3Z','url(#silk)',line('#709b98',.95))
   + place(star,-3,-4,8,.74);
@@ -154,9 +149,16 @@ function drawing(headX,headY,tilt,earStyle,hindKey,foreKey, opts={}) {
   const [far,near]=ears[earStyle];
   const earPair=place(ear(far[0],far[1],far[2],far[3]+farTip,true),-6,-10,earTilt+(['perk','listen','lift'].includes(earStyle)?-7:17))
     +place(ear(near[0],near[1],near[2],near[3]+nearTip,false),-2,-10,earTilt);
-  const body=place(tail,-21,0,tailAngle)
-    +leg(hind,hindKey,-6,hindY-1,farHindAngle,true)+leg(fore,foreKey,9,nearForeY-2,farForeAngle,true)
-    +torso+leg(hind,hindKey,-10,hindY,hindAngle)+leg(fore,foreKey,7,nearForeY,foreAngle);
+  const body = coat([
+    shape(tail,-29,-2,tailAngle),
+    shape(hind[hindKey],-11,hindY-1,farHindAngle),
+    shape(fore[foreKey],12,nearForeY-2,farForeAngle),
+    shape(torso,0,0),
+    shape(hind[hindKey],-14,hindY,hindAngle),
+    shape(fore[foreKey],10,nearForeY,foreAngle),
+  ]) + oval(-8,-8,21,18,'url(#coatHighlight)')
+    + place(oval(-3,-3,6,5,'url(#coatHighlight)'),-29,-2,tailAngle)
+    + place(pads[hindKey] ?? '',-14,hindY,hindAngle);
   return {art:place(body,bodyX,bodyY,0,sx,sy)+place(earPair,headX,headY,tilt)
     +place(scarf,headX-8,headY+18,tilt*.35), socket:[headX,headY,tilt]};
 }
@@ -216,6 +218,6 @@ const rows=cells.length/columns, width=columns*cell, height=rows*cell;
 const sheet=`<svg xmlns="http://www.w3.org/2000/svg" width="${width*2}" height="${height*2}" viewBox="0 0 ${width} ${height}">${defs}${cells.map((art,i)=>place(art,(i%columns+.5)*cell,Math.floor(i/columns)*cell+pivotY)).join('')}</svg>`;
 png(sheet,'sprites/leslie.png');
 write('src/game/characters/leslieFrames.json', JSON.stringify({cell:cell*2,pivotY:pivotY/cell,poses,heads,effects},null,2)+'\n');
-const icon=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="-42 -42 84 84">${defs}<rect x="-42" y="-42" width="84" height="84" fill="#f2ccca"/>${place(portrait('joy'),0,4,0,.96)}</svg>\n`;
+const icon=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="-42 -42 84 84">${defs}<rect x="-42" y="-42" width="84" height="84" fill="#f2ccca"/>${place(portrait('joy'),2,5,0,.82)}</svg>\n`;
 write('public/icons/bunny.svg',icon);
 for(const size of [192,512]) png(icon,`icons/bunny-${size}.png`,size);
