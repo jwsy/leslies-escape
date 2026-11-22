@@ -2,7 +2,7 @@ import {describe,it,expect} from 'vitest';
 import {level1} from '../src/game/levels/level1';
 import {level2} from '../src/game/levels/level2';
 import {level3} from '../src/game/levels/level3';
-import {chargedJumpMultiplier,chooseSwimTarget,jumpCanReach,powerJumpUnlocked,recoveryLandingX,riseTide,SPIKE_PLATFORM_CLEARANCE,swimStep,visibleWaterY,POWER_JUMP_HOLD_DELAY_MS} from '../src/game/systems/GameplayRules';
+import {cameraFollowOffset,chargedJumpMultiplier,chooseSwimTarget,jumpCanReach,powerJumpUnlocked,recoveryLandingX,riseTide,SPIKE_PLATFORM_CLEARANCE,swimStep,visibleWaterY,POWER_JUMP_HOLD_DELAY_MS} from '../src/game/systems/GameplayRules';
 const tuning={runSpeed:175,jumpVelocity:-455,gravity:950};
 describe('Level 1 gameplay rules',()=>{
  it('has a longer, steadily rising route with varied platform lengths and balanced reachable gaps',()=>{const route=level1.platforms.filter(p=>/^p\d+$/.test(p.id)).sort((a,b)=>a.x-b.x);expect(route.length).toBeGreaterThanOrEqual(10);expect(new Set(route.map(p=>p.width)).size).toBeGreaterThanOrEqual(5);for(let i=0;i<route.length-1;i++){const gap=route[i+1]!.x-(route[i]!.x+route[i]!.width);expect(route[i]!.y).toBeGreaterThan(route[i+1]!.y);expect(gap).toBeGreaterThanOrEqual(50);expect(gap).toBeLessThanOrEqual(60);expect(jumpCanReach(route[i]!,route[i+1]!,tuning),`${route[i]!.id} → ${route[i+1]!.id}`).toBe(true)}});
@@ -21,5 +21,6 @@ describe('Chapter route safety',()=>{
 });
 describe('Charged jump and visible tide',()=>{
  it('unlocks a slower, longer charge after five rescues and caps the hold bonus',()=>{expect(powerJumpUnlocked(4)).toBe(false);expect(powerJumpUnlocked(5)).toBe(true);expect(chargedJumpMultiplier(0)).toBe(1);expect(chargedJumpMultiplier(299)).toBe(1);expect(chargedJumpMultiplier(300)).toBe(1);expect(chargedJumpMultiplier(1000)).toBeCloseTo(1.24);expect(chargedJumpMultiplier(1700)).toBeCloseTo(1.48);});
- it('keeps the sea horizon inside the lower camera view until the actual tide rises higher',()=>{expect(visibleWaterY(1120,600,540)).toBe(1044);expect(visibleWaterY(800,600,540)).toBe(800);});
+ it('lets the sea horizon rise on screen while camera tracks Leslie',()=>{expect(visibleWaterY(1120,600,540)).toBe(1044);expect(visibleWaterY(1000,600,540,96,120)).toBe(924);expect(visibleWaterY(800,600,540)).toBe(800);});
+ it('frames Leslie low-left so the next ascending platform remains above her and in view',()=>{const offset=cameraFollowOffset(960,540);const playerX=480+offset.x,playerY=270+offset.y;expect(playerX).toBeCloseTo(403.2);expect(playerY).toBeCloseTo(367.2);expect(playerY-75).toBeGreaterThan(80);expect(playerY-75).toBeLessThan(540);});
 });

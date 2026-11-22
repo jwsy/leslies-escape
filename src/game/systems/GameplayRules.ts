@@ -9,8 +9,10 @@ export function chooseSafeRecovery(platforms:PlatformDef[],preferredId:string,ch
 export function chooseSwimTarget(platforms:PlatformDef[],lastPlatform:string,checkpointId:string,playerX:number,waterY:number,margin=24){const safe=(p:PlatformDef|undefined)=>p&&p.y<waterY-margin?p:undefined;const checkpoint=safe(platforms.find(p=>p.id===checkpointId));const last=safe(platforms.find(p=>p.id===lastPlatform));if(last&&last.x<=playerX+24)return last;const checkpointX=platforms.find(p=>p.id===checkpointId)?.x??0;const prior=platforms.filter(p=>p.x>=checkpointX&&p.x<=playerX+24&&safe(p)).sort((a,b)=>b.x-a.x)[0];const anyPrior=platforms.filter(p=>p.x<=playerX+24&&safe(p)).sort((a,b)=>b.x-a.x)[0];const nearestSafe=platforms.filter(p=>safe(p)).sort((a,b)=>Math.abs(a.x-playerX)-Math.abs(b.x-playerX))[0];return prior??(checkpoint&&checkpoint.x<=playerX+24?checkpoint:undefined)??anyPrior??nearestSafe??null;}
 export function swimStep(x:number,targetX:number,speed:number,dtMs:number){return x+Math.sign(targetX-x)*Math.min(Math.abs(targetX-x),speed*dtMs/1000);}
 export function recoveryLandingX(platform:PlatformDef,inset=24){return platform.x+Math.min(inset,platform.width/3);}
-/** Keep a calm, visible sea horizon just inside the lower edge of the camera. */
-export function visibleWaterY(waterY:number,cameraY:number,viewHeight:number,bottomMargin=96){return Math.min(waterY,cameraY+viewHeight-bottomMargin);}
+/** Render a visible tide horizon that continues rising in screen space as the camera tracks Leslie. */
+export function visibleWaterY(waterY:number,cameraY:number,viewHeight:number,bottomMargin=96,riseSinceStart=0){return Math.min(waterY,cameraY+viewHeight-bottomMargin-Math.max(0,riseSinceStart));}
+/** Offset Phaser's follow target so Leslie sits low-left with room to see the next ledge. */
+export function cameraFollowOffset(width:number,height:number,focusX=.42,focusY=.68){return{x:width*focusX-width/2,y:height*focusY-height/2};}
 /** Five rescues unlock a charged jump; a short hold is still a normal hop. */
 export function powerJumpUnlocked(rescuedCount:number){return rescuedCount>=5;}
 export const POWER_JUMP_HOLD_DELAY_MS=300;
