@@ -22,7 +22,7 @@ The GitHub Actions workflow publishes to GitHub Pages at `https://jwsy.github.io
 
 ## Controls
 
-Tap/click in the play area, press Space, or press ↑ to jump. After rescuing five birds, hold and release to charge a stronger jump; Leslie pauses on a ledge while charging. Leslie runs right automatically. Use the pause button or Escape to pause. Use the Settings panel on the title screen to tune sound; the game also honors the operating system’s reduced-motion preference.
+Tap/click in the play area, press Space, or press ↑ to jump. After rescuing five birds, hold for about a third of a second to begin charging, then release for a stronger jump. A full charge takes about 1.7 seconds total; Leslie pauses safely on the ledge while the charge builds. Leslie runs right automatically. Use the pause button or Escape to pause. Use the Settings panel on the title screen to tune sound; the game also honors the operating system’s reduced-motion preference.
 
 ## Project structure
 

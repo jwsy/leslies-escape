@@ -13,4 +13,7 @@ export function recoveryLandingX(platform:PlatformDef,inset=24){return platform.
 export function visibleWaterY(waterY:number,cameraY:number,viewHeight:number,bottomMargin=96){return Math.min(waterY,cameraY+viewHeight-bottomMargin);}
 /** Five rescues unlock a charged jump; a short hold is still a normal hop. */
 export function powerJumpUnlocked(rescuedCount:number){return rescuedCount>=5;}
-export function chargedJumpMultiplier(heldMs:number,maxHoldMs=850,maxMultiplier=1.48){return 1+(maxMultiplier-1)*Math.max(0,Math.min(1,heldMs/maxHoldMs));}
+export const POWER_JUMP_HOLD_DELAY_MS=300;
+export const POWER_JUMP_CHARGE_MS=1400;
+export const SPIKE_PLATFORM_CLEARANCE=96;
+export function chargedJumpMultiplier(heldMs:number,maxHoldMs=POWER_JUMP_CHARGE_MS,maxMultiplier=1.48,holdDelayMs=POWER_JUMP_HOLD_DELAY_MS){return 1+(maxMultiplier-1)*Math.max(0,Math.min(1,(heldMs-holdDelayMs)/maxHoldMs));}
