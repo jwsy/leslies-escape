@@ -22,7 +22,7 @@ The GitHub Actions workflow publishes to GitHub Pages at `https://jwsy.github.io
 
 ## Controls
 
-Tap/click in the play area, press Space, or press ↑ to jump. Leslie runs right automatically. Use the pause button or Escape to pause. Use the Settings panel on the title screen to tune sound; the game also honors the operating system’s reduced-motion preference.
+Tap/click in the play area, press Space, or press ↑ to jump. After rescuing five birds, hold and release to charge a stronger jump; Leslie pauses on a ledge while charging. Leslie runs right automatically. Use the pause button or Escape to pause. Use the Settings panel on the title screen to tune sound; the game also honors the operating system’s reduced-motion preference.
 
 ## Project structure
 
@@ -32,7 +32,9 @@ Tap/click in the play area, press Space, or press ↑ to jump. Leslie runs right
 - `src/game/characters/LeslieView.ts`: Leslie’s layered sprite poses and effects.
 - `public/icons`: Leslie’s original favicon and install icons.
 
-Level 1 is a longer diagonal climb across eleven varied-length ledges with balanced gaps, with the spike hazards removed. Missing a jump starts a gentle swim back to the left edge of a dry ledge, followed by a climb-out and automatic run. Leslie’s original artwork is bundled in `public/sprites/leslie.png`. To regenerate the sheet and icons after editing the artwork, run `node scripts/draw-leslie.mjs` with librsvg’s `rsvg-convert` installed. Levels 2 and 3 currently provide data scaffolds. Scenery is drawn in Phaser and sound is synthesized locally.
+Level 1 is a longer diagonal climb across eleven varied-length ledges with balanced gaps and no spikes. The Cliffs and The Sanctuary are fully playable follow-up chapters, with spikes, wide hazard platforms, crumbling ledges, checkpoints, and power-ups. Missing a jump starts a gentle swim back to a dry ledge behind Leslie; the tide stays visible at the bottom of the view while rising at its world-space pace. Rescued birds carry across chapters and saved games. Leslie’s original artwork is bundled in `public/sprites/leslie.png`. To regenerate the sheet and icons after editing the artwork, run `node scripts/draw-leslie.mjs` with librsvg’s `rsvg-convert` installed. Scenery is drawn in Phaser and sound is synthesized locally.
+
+Run `npm test` for route reachability, spike-clearance, recovery, tide visibility, charge-jump, and save migration checks.
 
 ## Offline and save data
 

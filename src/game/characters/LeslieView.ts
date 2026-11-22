@@ -208,6 +208,8 @@ export class LeslieView {
     if (Number(this.face.frame.name) !== face) this.face.setFrame(face);
 
     this.root.setPosition(motion.x, motion.y);
+    // Water recovery always heads back toward a ledge behind Leslie.
+    this.root.setScale(state === 'swim' ? -1 : 1, 1);
     this.applyPose(this.pose);
     const waterLine = motion.waterY - motion.y;
     this.ripple.setPosition(0, waterLine).setVisible(state === 'swim' && waterLine >= 3 && waterLine < 24);
