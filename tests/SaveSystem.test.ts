@@ -1,0 +1,5 @@
+import { describe,it,expect,beforeEach } from 'vitest';
+import { SaveSystem } from '../src/game/systems/SaveSystem';
+const store=new Map<string,string>();
+Object.defineProperty(globalThis,'localStorage',{value:{getItem:(k:string)=>store.get(k)??null,setItem:(k:string,v:string)=>store.set(k,v),removeItem:(k:string)=>store.delete(k)}});
+describe('SaveSystem',()=>{beforeEach(()=>store.clear());it('round-trips persistent flock and checkpoint data',()=>{const data={version:1 as const,rescued:['bird-1','bird-2'],checkpoint:'p3',waterY:624,powers:['bubble']};SaveSystem.save(data);expect(SaveSystem.load()).toEqual(data)});it('ignores unsupported or malformed saves',()=>{store.set('leslies-escape-save-v1','{');expect(SaveSystem.load()).toBeNull();store.set('leslies-escape-save-v1',JSON.stringify({version:2,rescued:[],checkpoint:'p0'}));expect(SaveSystem.load()).toBeNull()});it('clears progress',()=>{SaveSystem.save({version:1,rescued:[],checkpoint:'p0',waterY:758,powers:[]});SaveSystem.clear();expect(SaveSystem.load()).toBeNull()})});

@@ -1,0 +1,8 @@
+export class AudioSystem{
+ private ctx?:AudioContext; volume=.45; muted=false; private ambience?:{osc:OscillatorNode;osc2:OscillatorNode;gain:GainNode};
+ tone(freq:number,dur=.12,type:OscillatorType='sine',endFreq=freq){try{this.ctx??=new AudioContext();if(this.ctx.state==='suspended')void this.ctx.resume();const o=this.ctx.createOscillator(),g=this.ctx.createGain();o.type=type;o.frequency.setValueAtTime(freq,this.ctx.currentTime);o.frequency.exponentialRampToValueAtTime(Math.max(1,endFreq),this.ctx.currentTime+dur);g.gain.setValueAtTime(this.muted?0:this.volume*.12,this.ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,this.ctx.currentTime+dur);o.connect(g).connect(this.ctx.destination);o.start();o.stop(this.ctx.currentTime+dur);}catch{}}
+ chirp(){this.tone(620,.13,'sine',920)} jump(){this.tone(260,.12,'sine',440)} splash(){this.tone(170,.22,'sine',80)} checkpoint(){this.tone(440,.35,'sine',880)} power(){this.tone(520,.25,'triangle',1000)} rescue(){this.tone(740,.23,'sine',1080)}
+ startAmbience(){try{this.ctx??=new AudioContext();if(this.ambience)return;const gain=this.ctx.createGain(),osc=this.ctx.createOscillator(),osc2=this.ctx.createOscillator();osc.type='sine';osc.frequency.value=110;osc2.type='sine';osc2.frequency.value=164.81;gain.gain.value=this.muted?0:this.volume*.018;osc.connect(gain);osc2.connect(gain);gain.connect(this.ctx.destination);osc.start();osc2.start();this.ambience={osc,osc2,gain};}catch{}}
+ setVolume(v:number){this.volume=v;if(this.ambience)this.ambience.gain.gain.setTargetAtTime(this.muted?0:v*.018,this.ctx!.currentTime,.08)}
+ setMuted(v:boolean){this.muted=v;if(this.ambience)this.ambience.gain.gain.setTargetAtTime(v?0:this.volume*.018,this.ctx!.currentTime,.08)}
+}
